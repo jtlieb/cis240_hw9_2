@@ -47,16 +47,43 @@ int validFunctionName(char *str) {
     return 1;
 }
 
-void next_token(FILE *file, token *token) {
+int next_token(FILE *file, token *token) {
     char str[201];
     int index = 0;
     int c = fgetc(file); 
 
     // READING IN NEXT TOKEN
-    while (c != ' ' && c != EOF && c != '\n') {
+    while (1) {
+        if (c == ' ' || c == '\n') {
+            if (index > 0) {
+                break;
+            } else {
+                c = fgetc(file);
+            }
+        } else if (c == EOF) {
+            if (index == 0) {
+            return 1;
+            } else {
+            break;
+            }
+        } else if (c == ';') {
+            while(1) {
+                if (c == '\n') {
+                    break;
+                } else if (c == EOF) {
+                    if (index == 0) {
+                        return 1;
+                    } else {
+                        break;
+                    }
+                }
+                c = fgetc(file);
+            }
+        } else {
         str[index] = (char) c;
         c = fgetc(file);
         index++;
+        }
     }
     
     if (!strcmp(str, "defun")) {
@@ -107,47 +134,88 @@ void next_token(FILE *file, token *token) {
     } else if (!strcmp(str, "return")) {
         token -> type = RETURN;
     }else if (str[0] == 'a' && str[1] == 'r' && str[2] == 'g' && isdigit(str[3])) {
-        int arg = atoi(&str[4]);
+        int arg = atoi(&str[3]);
         if (strlen(str) <= 5) {
-            if (strlen(str) == 5) {
-                arg = arg * 10 + atoi(&str[5]);
+            if (arg <= 20 && arg > 0) {
+                token -> type = ARG; 
+                token -> arg_no = arg;
+            } else {
+                token -> type = BROKEN_TOKEN;
             }
-        if (arg <= 20) {
-            printf("HELLO\n\n");
-
-        
-        token -> type = ARG; 
-        token -> arg_no = arg;
-        } else {
-            token -> type = BROKEN_TOKEN;
-        }
         } else {
             token -> type = BROKEN_TOKEN;
         }
     } else {
-        if (isNumber(str)) {
+        if (str[0] == '-' && isNumber(&str[1])) {
             token -> type = LITERAL;
+            token -> literal_value = -1 * atoi(&str[1]);
+
+        } else if (isNumber(str)) {
+            token -> type = LITERAL;
+            token -> literal_value = atoi(str);
+
         } else if (isHex(str)) {
             token -> type = LITERAL;
+            for (int i = 2; i < strlen(str); i++) {
+                token -> literal_value *= 16;
+                if (!isdigit(str[i])) {
+                    switch(str[i]) {
+                        case 'A':
+                        case 'a':
+                            token -> literal_value += 10;
+                            break;
+                        case 'B':
+                        case 'b':
+                            token -> literal_value += 11;
+                            break;
+
+                        case 'C':
+                        case 'c':
+                            token -> literal_value += 12;
+                            break;
+                        case 'D':
+                        case 'd':
+                            token -> literal_value += 13;
+                            break;   
+                        case 'E':
+                        case 'e':
+                            token -> literal_value += 14;
+                            break;
+                        case 'F':
+                        case 'f':
+                            token -> literal_value += 15;
+                            break;     
+                    }
+                } else {
+                    token -> literal_value += atoi(&str[i]);
+                }
+            }
         } else {
             token -> type = BROKEN_TOKEN;
-            printf("BROKEN TOKEN: %s\n", str);
         }
     }
 
     if (defun) {
         if (token -> type != BROKEN_TOKEN) {
-        printf("ERROR: NO DEFUN AFTER \n"); 
+        printf("******************* \nERROR: NO DEFUN AFTER \n******************* \n"); 
+        exit(1);
         } else if (validFunctionName(str)) {
             token -> type = IDENT;
             defun = 0;
         }
+    }
+
+    if (token -> type == BROKEN_TOKEN && validFunctionName(str)) {
+        token -> type = IDENT;
     }
     // AT END OF FUNCTION, CLEARS STRING
     
 
     if (token -> type == DEFUN) {
         defun = 1;
+    } else if (defun) {
+        printf("**************************\nCALLLED DEFUN BUT DID NOT DEFINE FUNCTION\n**************************\n");
+        exit(1);
     }
     strcpy(token -> str, str);
 
@@ -157,18 +225,97 @@ void next_token(FILE *file, token *token) {
     }
 
     print_token(token);
+    return 0;
 
     
 
 }
 
 
-int read_token (token *theToken, FILE *theFile);
 
 // Extra functions which you may wish to define and use , or not
 const char *token_type_to_string (int type);
 
 void print_token (token *theToken) {
-    printf("%u:  %s\n", theToken -> type, theToken -> str);
+    switch(theToken -> type) {
+        case DEFUN:
+            printf("DEFUN");
+            break;
+        case IDENT:
+            printf("IDENT");
+            break;
+        case RETURN:
+            printf("RETURN");
+            break;
+        case PLUS:
+            printf("PLUS");
+            break;
+        case MINUS:
+            printf("MINUS");
+            break;
+        case MUL:
+            printf("MUL");
+            break;
+        case DIV :
+            printf("DIV");
+            break;
+        case MOD:
+            printf("MOD");
+            break;
+        case AND:
+            printf("AND");
+            break; 
+        case OR:
+            printf("OR");
+            break;
+        case NOT:
+            printf("NOT");
+            break;
+        case LT:
+            printf("LT");
+            break;
+        case LE:
+            printf("LE");
+            break;
+        case EQ:
+            printf("EQ");
+            break;
+        case GE:
+            printf("GE");
+            break;
+        case GT: 
+            printf("GT");
+            break;
+        case IF :
+            printf("IF");
+            break;
+        case ELSE:
+            printf("ELSE");
+            break;
+        case ENDIF:
+            printf("ENDIF");
+            break;   
+        case DROP:
+            printf("DROP");
+            break;
+        case DUP:
+            printf("DUP");
+            break;
+        case SWAP:
+            printf("SWAP");
+            break;
+        case ROT :
+            printf("ROT");
+            break;
+        case ARG:
+            printf("ARG%d", theToken -> arg_no);
+            break;
+        case LITERAL:
+            printf("LITERAL %d", theToken -> literal_value);
+            break;    
+        case BROKEN_TOKEN:
+            printf("BROKEN_TOKEN");                    
+    }
+    printf(":  '%s'\n",  theToken -> str);
 }
 

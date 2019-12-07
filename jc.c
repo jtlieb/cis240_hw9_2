@@ -36,14 +36,16 @@ int main(int argc, char **argv) {
     while (!feof(input)) {
         token = malloc(sizeof(token));
         next_token(input, token);
+
+
+        free(token);
     }
 
 
 
     // CLOSE FILES
     fclose(input);
-    fclose(output);
-
+    fclose(output); 
 
 
 }

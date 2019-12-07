@@ -29,9 +29,8 @@ typedef struct {
 extern int line_number;
 
 
-void next_token(FILE *file, token *token);
+int next_token(FILE *file, token *token);
 
-int read_token (token *theToken, FILE *theFile);
 
 // Extra functions which you may wish to define and use , or not
 const char *token_type_to_string (int type);
