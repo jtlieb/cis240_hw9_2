@@ -1,14 +1,10 @@
-#include <ctype.h>
-#include <string.h>
-#include <stdio.h> 
-#include <stdlib.h>
-
 /*
  * token.h
  */
 
 #define MAX_TOKEN_LENGTH 250
 
+#include <stdio.h>
 
 typedef struct {
   enum { DEFUN, IDENT, RETURN, 
@@ -27,9 +23,6 @@ typedef struct {
 
 // line_number : You can use this to keep track of the current line number which can be useful in reporting syntax errors.
 extern int line_number;
-
-
-void next_token(FILE *file, token *token);
 
 int read_token (token *theToken, FILE *theFile);
 
