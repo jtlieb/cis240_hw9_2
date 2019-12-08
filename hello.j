@@ -1,1 +1,1 @@
-defun 01a
+defun test  return test -2
