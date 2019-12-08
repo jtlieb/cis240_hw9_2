@@ -89,7 +89,12 @@ int main(int argc, char **argv) {
                 fprintf(output, "   ADD R6, R6, #1\n");
                 break;
             case MINUS:
-                printf("MINUS");
+                fprintf(output, "\n   ;; Subtract\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   SUB R0, R0, R1\n");
+                fprintf(output, "   STR R0, R6, #1\n");
+                fprintf(output, "   ADD R6, R6, #1\n");
                 break;
             case MUL:
                 fprintf(output, "\n   ;; Multiply\n");
@@ -100,19 +105,42 @@ int main(int argc, char **argv) {
                 fprintf(output, "   ADD R6, R6, #1\n");
                 break;
             case DIV :
-                printf("DIV");
+                fprintf(output, "\n   ;; Divide\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   DIV R0, R0, R1\n");
+                fprintf(output, "   STR R0, R6, #1\n");
+                fprintf(output, "   ADD R6, R6, #1\n");
                 break;
             case MOD:
-                printf("MOD");
+                fprintf(output, "\n   ;; Modulus\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   MOD R0, R0, R1\n");
+                fprintf(output, "   STR R0, R6, #1\n");
+                fprintf(output, "   ADD R6, R6, #1\n");
                 break;
             case AND:
-                printf("AND");
+                fprintf(output, "\n   ;; And\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   AND R0, R0, R1\n");
+                fprintf(output, "   STR R0, R6, #1\n");
+                fprintf(output, "   ADD R6, R6, #1\n");
                 break; 
             case OR:
-                printf("OR");
+                fprintf(output, "\n   ;; Or\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   OR R0, R0, R1\n");
+                fprintf(output, "   STR R0, R6, #1\n");
+                fprintf(output, "   ADD R6, R6, #1\n");
                 break;
             case NOT:
-                printf("NOT");
+                fprintf(output, "\n   ;; Not\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   NOT R0, R0\n");
+                fprintf(output, "   STR R0, R6, #0\n");
                 break;
             case LT:
                 printf("LT");
