@@ -1,5 +1,6 @@
 
 #include "token.h"
+#include "stack.h"
 
 
 
@@ -16,9 +17,7 @@ int main(int argc, char **argv) {
     }
     
     // OPENING OUTPUT FILE
-    char arg[strlen(argv[1]) + 2];
-    strncpy(arg, argv[1], strlen(argv[1]) - 2);
-    strcat(arg, ".asm");
+    char *arg = "./tests/hello.asm";
     output = fopen(arg, "w");
     if (output == NULL) {
         fclose(input);
@@ -32,10 +31,9 @@ int main(int argc, char **argv) {
     //     printf("hello\n");
     // }
     token *token;
-    int status, function = 0, ifs = 0, nested = 0;
+    int status, function = 0, ifs = 0, peek;
     short temp;
-
-    fprintf(output, "        .CODE\n");
+    stack *stack = malloc(sizeof(stack));
 
     while (!feof(input)) {
         token = malloc(sizeof(token));
@@ -48,7 +46,8 @@ int main(int argc, char **argv) {
                 } 
 
                 if (token -> type == IDENT) {
-                    fprintf(output, "\n        .FALIGN\n");
+                    fprintf(output, "\n\n      .CODE\n");
+                    fprintf(output, "      .FALIGN\n");
                     fprintf(output, "%s\n", token -> str);
                     fprintf(output, "   ;; Saving previous frame\n");
                     fprintf(output, "   ADD R6, R6, #-3\n");
@@ -63,6 +62,7 @@ int main(int argc, char **argv) {
             case IDENT:
                 fprintf(output, "\n   ;; Calling function %s\n", token -> str);
                 fprintf(output, "   JSR %s\n", token -> str);
+                fprintf(output, "   ADD R6, R6, #-1\n");
 
                 break;
             case RETURN:
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
                     fprintf(output, "   ADD R6, R5, #0\n");
                     fprintf(output, "   LDR R5, R6, #0\n");
                     fprintf(output, "   LDR R7, R6, #1\n");
-                    fprintf(output, "   ADD R6, R6, #2\n");
+                    fprintf(output, "   ADD R6, R6, #3\n");
                     fprintf(output, "   RET");
                 } else {
                     printf("RETURN OUTSIDE OF FUNCTION\n");
@@ -158,13 +158,20 @@ int main(int argc, char **argv) {
                 printf("GT");
                 break;
             case IF :
-                printf("IF");
+                // fprintf(output, "\n   ;; IF STATEMENT\n");
+                // fprintf(output, "   BRnz else_%d\n", ifs);
+                // push(stack, ifs);
+                // ifs++;
                 break;
             case ELSE:
-                printf("ELSE");
+                // peek = peek(stack);
+                // fprintf(output, "\n   ;; ELSE STATEMENT\n");
+                // fprintf(output, "   BRnzp endif_%d\n", peek);
+                // fprintf(output, "else_%d\n", peek);
                 break;
             case ENDIF:
-                printf("ENDIF");
+                peek = pop(stack);
+                fprintf(output, "   ");
                 break;   
             case DROP:
                 printf("DROP");
@@ -193,6 +200,7 @@ int main(int argc, char **argv) {
                 fprintf(output, "   HICONST R0, #%d\n", ((temp >> 8) & 0xFF));
                 fprintf(output, "   ADD R6, R6, #-1\n");
                 fprintf(output, "   STR R0, R6, #0\n");
+                
                 break;    
             case BROKEN_TOKEN:
                 printf("BROKEN_TOKEN");                    
@@ -207,6 +215,11 @@ int main(int argc, char **argv) {
     fclose(input);
     fclose(output); 
 
+    int x = pop(stack);
+    while (x != -1) {
+        pop(stack);
+    }
+    free(stack);
 
 }
 

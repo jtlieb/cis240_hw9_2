@@ -1,0 +1,7 @@
+clear
+reset
+as os os
+as hello libc printnum hello
+ld os
+ld hello
+break set TRAP_HALT
