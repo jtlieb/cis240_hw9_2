@@ -49,13 +49,12 @@ int validFunctionName(char *str) {
 
 int next_token(FILE *file, token *token) {
     char str[201];
-    memset(str, 0, strlen(str));
+    memset(str, 0, 201);
     int index = 0;
-    int c = fgetc(file); 
-
+    char c = fgetc(file);
     // READING IN NEXT TOKEN
     while (1) {
-        if (c == ' ' || c == '\n') {
+        if (c == ' ' || c == '\n' || c == '\t') {
             if (index > 0) {
                 break;
             } else {
@@ -68,18 +67,10 @@ int next_token(FILE *file, token *token) {
             break;
             }
         } else if (c == ';') {
-            while(1) {
-                if (c == '\n') {
-                    break;
-                } else if (c == EOF) {
-                    if (index == 0) {
-                        return 1;
-                    } else {
-                        break;
-                    }
-                }
+            while(c != '\n') {
                 c = fgetc(file);
             }
+            c = fgetc(file);
         } else {
         str[index] = (char) c;
         c = fgetc(file);
@@ -157,40 +148,9 @@ int next_token(FILE *file, token *token) {
 
         } else if (isHex(str)) {
             token -> type = LITERAL;
-            for (int i = 2; i < strlen(str); i++) {
-                token -> literal_value *= 16;
-                if (!isdigit(str[i])) {
-                    switch(str[i]) {
-                        case 'A':
-                        case 'a':
-                            token -> literal_value += 10;
-                            break;
-                        case 'B':
-                        case 'b':
-                            token -> literal_value += 11;
-                            break;
-
-                        case 'C':
-                        case 'c':
-                            token -> literal_value += 12;
-                            break;
-                        case 'D':
-                        case 'd':
-                            token -> literal_value += 13;
-                            break;   
-                        case 'E':
-                        case 'e':
-                            token -> literal_value += 14;
-                            break;
-                        case 'F':
-                        case 'f':
-                            token -> literal_value += 15;
-                            break;     
-                    }
-                } else {
-                    token -> literal_value += atoi(&str[i]);
-                }
-            }
+            unsigned int x;
+            sscanf(str, "0x%x", &x);
+            token -> literal_value = (int) x;
         } else {
             token -> type = BROKEN_TOKEN;
         }
@@ -220,6 +180,7 @@ int next_token(FILE *file, token *token) {
     }
     strcpy(token -> str, str);
     print_token(token);
+
     return 0;
 
     

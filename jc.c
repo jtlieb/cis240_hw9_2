@@ -2,13 +2,20 @@
 #include "token.h"
 #include "stack.h"
 
+void finish(FILE *input, FILE *output, stack *stack) {
+    
+
+}
 
 
 int main(int argc, char **argv) {
 
     // DECLARING INPUT AND OUTPUT FILES
     FILE *output, *input;
+    char arg[50];
+    char asm_arg[50];
 
+    sscanf(argv[1], "%[^.].j", arg);
     input = fopen(argv[1], "r");
     if (input == NULL) {
         // DELETE LATER
@@ -17,8 +24,9 @@ int main(int argc, char **argv) {
     }
     
     // OPENING OUTPUT FILE
-    char *arg = "./tests/hello.asm";
-    output = fopen(arg, "w");
+    sprintf(asm_arg, "%s.asm", arg);
+    printf("NAME: %s  %s", asm_arg, arg);
+    output = fopen(asm_arg, "w");
     if (output == NULL) {
         fclose(input);
         // DELETE LATER
@@ -30,14 +38,15 @@ int main(int argc, char **argv) {
     // while (!feof(input)) {
     //     printf("hello\n");
     // }
-    token *token;
-    int status, function = 0, ifs = 0, peeked, elseClause;
+    token *token = malloc(sizeof(token));
+    int status, function = 0, ifs = 0, peeked, elseClause, arg_offset, cmp = 0;
     short temp;
     stack *stack = malloc(sizeof(stack));
 
     while (!feof(input)) {
-        token = malloc(sizeof(token));
         next_token(input, token);
+
+
         switch(token -> type) {
             case DEFUN:
                 status = next_token(input, token);
@@ -66,6 +75,7 @@ int main(int argc, char **argv) {
 
                 break;
             case RETURN:
+
                 if (function) {
                     fprintf(output, "\n   ;; Epilogue before return\n");
                     fprintf(output, "   LDR R7, R6, #0\n");
@@ -143,22 +153,104 @@ int main(int argc, char **argv) {
                 fprintf(output, "   STR R0, R6, #0\n");
                 break;
             case LT:
-                printf("LT");
+                fprintf(output, "\n   ;; Less Than\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   CMP R0 R1\n");
+                fprintf(output, "   BRzp cmp_false_%d\n", cmp);
+                // TRUE CLAUSE
+                fprintf(output, "   CONST R2, #1\n");
+                fprintf(output, "   BRnzp cmp_end_%d\n", cmp);
+                fprintf(output, "cmp_false_%d\n", cmp);
+                // FALSE CLAUSE
+                fprintf(output, "   CONST R2, #0\n");
+                fprintf(output, "cmp_end_%d\n", cmp);
+
+                fprintf(output, "   ADD R6, R6, #1\n");
+                fprintf(output, "   STR R2, R6, #0\n");
+
+                cmp++;
                 break;
             case LE:
-                printf("LE");
+                fprintf(output, "\n   ;; Less Than\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   CMP R0 R1\n");
+                fprintf(output, "   BRp cmp_false_%d\n", cmp);
+                // TRUE CLAUSE
+                fprintf(output, "   CONST R2, #1\n");
+                fprintf(output, "   BRnzp cmp_end_%d\n", cmp);
+                fprintf(output, "cmp_false_%d\n", cmp);
+                // FALSE CLAUSE
+                fprintf(output, "   CONST R2, #0\n");
+                fprintf(output, "cmp_end_%d\n", cmp);
+
+                fprintf(output, "   ADD R6, R6, #1\n");
+                fprintf(output, "   STR R2, R6, #0\n");
+
+                cmp++;
                 break;
             case EQ:
-                printf("EQ");
+                fprintf(output, "\n   ;; Less Than\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   CMP R0 R1\n");
+                fprintf(output, "   BRnp cmp_false_%d\n", cmp);
+                // TRUE CLAUSE
+                fprintf(output, "   CONST R2, #1\n");
+                fprintf(output, "   BRnzp cmp_end_%d\n", cmp);
+                fprintf(output, "cmp_false_%d\n", cmp);
+                // FALSE CLAUSE
+                fprintf(output, "   CONST R2, #0\n");
+                fprintf(output, "cmp_end_%d\n", cmp);
+
+                fprintf(output, "   ADD R6, R6, #1\n");
+                fprintf(output, "   STR R2, R6, #0\n");
+
+                cmp++;
                 break;
             case GE:
-                printf("GE");
+                fprintf(output, "\n   ;; Greater/Equal\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   CMP R0 R1\n");
+                fprintf(output, "   BRn cmp_false_%d\n", cmp);
+                // TRUE CLAUSE
+                fprintf(output, "   CONST R2, #1\n");
+                fprintf(output, "   BRnzp cmp_end_%d\n", cmp);
+                fprintf(output, "cmp_false_%d\n", cmp);
+                // FALSE CLAUSE
+                fprintf(output, "   CONST R2, #0\n");
+                fprintf(output, "cmp_end_%d\n", cmp);
+
+                fprintf(output, "   ADD R6, R6, #1\n");
+                fprintf(output, "   STR R2, R6, #0\n");
+
+                cmp++;
                 break;
             case GT: 
-                printf("GT");
+                fprintf(output, "\n   ;; Greater Than\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   CMP R0 R1\n");
+                fprintf(output, "   BRnz cmp_false_%d\n", cmp);
+                // TRUE CLAUSE
+                fprintf(output, "   CONST R2, #1\n");
+                fprintf(output, "   BRnzp cmp_end_%d\n", cmp);
+                fprintf(output, "cmp_false_%d\n", cmp);
+                // FALSE CLAUSE
+                fprintf(output, "   CONST R2, #0\n");
+                fprintf(output, "cmp_end_%d\n", cmp);
+
+                fprintf(output, "   ADD R6, R6, #1\n");
+                fprintf(output, "   STR R2, R6, #0\n");
+
+                cmp++;
                 break;
             case IF :
                 fprintf(output, "\n   ;; IF STATEMENT\n");
+                fprintf(output, "   ADD R6, R6, #1\n");
+                fprintf(output, "   LDR R0, R6, #-1\n");
                 fprintf(output, "   BRnz ELSE_%d\n", ifs);
                 push(stack, ifs);
                 ifs++;
@@ -181,13 +273,21 @@ int main(int argc, char **argv) {
                 }
                 break;   
             case DROP:
-                printf("DROP");
+                fprintf(output, "\n   ;; Drop\n");
+                fprintf(output, "   ADD R6, R6, #1");
                 break;
             case DUP:
-                printf("DUP");
+                fprintf(output, "\n   ;; Duplicate\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   ADD R6, R6, #-1\n");
+                fprintf(output, "   STR R0, R6, #0\n");
                 break;
             case SWAP:
-                printf("SWAP");
+                fprintf(output, "\n   ;; Swap\n");
+                fprintf(output, "   LDR R0, R6, #0\n");
+                fprintf(output, "   LDR R1, R6, #1\n");
+                fprintf(output, "   STR R0, R6, #1\n");
+                fprintf(output, "   STR R1, R6, #0\n");
                 break;
             case ROT :
                 fprintf(output, "\n   ;; Rotate\n");
@@ -199,6 +299,12 @@ int main(int argc, char **argv) {
                 fprintf(output, "   STR R2, R6, #0\n");
                 break;
             case ARG:
+                arg_offset = 2 + (token -> arg_no);
+                fprintf(output, "\n   ;; Moving ARG%d to the top of the stack\n", (token -> arg_no));
+                fprintf(output, "   LDR R0, R5, #%d\n", arg_offset);
+                fprintf(output, "   ADD R6, R6, #-1\n");
+                fprintf(output, "   STR R0, R6, #0\n");
+                
                 break;
             case LITERAL:
                 temp = (short) token -> literal_value;
@@ -210,24 +316,25 @@ int main(int argc, char **argv) {
                 
                 break;    
             case BROKEN_TOKEN:
-                printf("BROKEN_TOKEN");                    
+                printf("BROKEN_TOKEN");    
+                finish(input, output, stack);
+                exit(1);                
         }
-        
-        free(token);
-    }
 
+        
+    }
 
 
     // CLOSE FILES
     fclose(input);
     fclose(output); 
-
     int x = pop(stack);
     while (x != -1) {
         pop(stack);
     }
-    free(stack);
-
+    
 }
+
+
 
 
