@@ -11,6 +11,7 @@ void push(stack *x, int y) {
     elt *new_elt = malloc(sizeof(elt));
     new_elt -> num = y;
     new_elt -> next = x -> elt;
+    new_elt -> elsed = 0;
     x -> elt = new_elt;
     x -> size += 1;
 }
@@ -25,6 +26,7 @@ int pop(stack *x) {
         return rtrn;
     }
     return -1;
+    printf("ERROR: POPPING WHEN STACK IS EMPTY\n");
 }
 
 int peek(stack *x) {
@@ -32,5 +34,20 @@ int peek(stack *x) {
         return (x -> elt) -> num;
     }
     return -1;
+}
+
+int peekElse(stack *x) {
+    if (x -> size) {
+        return (x -> elt) -> elsed;
+    }
+    return -1;
+}
+
+void elsed(stack *x) {
+    if (x -> size) {
+    (x -> elt) -> elsed = 1;
+    } else {
+        printf("ERROR: ADDING ELSE STATEMENT WHEN STACK IS EMPTY\n");
+    }
 }
 

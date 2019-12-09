@@ -49,6 +49,7 @@ int validFunctionName(char *str) {
 
 int next_token(FILE *file, token *token) {
     char str[201];
+    memset(str, 0, strlen(str));
     int index = 0;
     int c = fgetc(file); 
 
@@ -133,7 +134,7 @@ int next_token(FILE *file, token *token) {
         token -> type = ROT;
     } else if (!strcmp(str, "return")) {
         token -> type = RETURN;
-    }else if (str[0] == 'a' && str[1] == 'r' && str[2] == 'g' && isdigit(str[3])) {
+    } else if (str[0] == 'a' && str[1] == 'r' && str[2] == 'g' && isdigit(str[3])) {
         int arg = atoi(&str[3]);
         if (strlen(str) <= 5) {
             if (arg <= 20 && arg > 0) {
@@ -218,12 +219,6 @@ int next_token(FILE *file, token *token) {
         exit(1);
     }
     strcpy(token -> str, str);
-
-
-    for (int i = 0; i <= index; i++) {
-        str[i] = (char) NULL;
-    }
-
     print_token(token);
     return 0;
 

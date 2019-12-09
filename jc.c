@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     //     printf("hello\n");
     // }
     token *token;
-    int status, function = 0, ifs = 0, peek;
+    int status, function = 0, ifs = 0, peeked, elseClause;
     short temp;
     stack *stack = malloc(sizeof(stack));
 
@@ -158,20 +158,27 @@ int main(int argc, char **argv) {
                 printf("GT");
                 break;
             case IF :
-                // fprintf(output, "\n   ;; IF STATEMENT\n");
-                // fprintf(output, "   BRnz else_%d\n", ifs);
-                // push(stack, ifs);
-                // ifs++;
+                fprintf(output, "\n   ;; IF STATEMENT\n");
+                fprintf(output, "   BRnz ELSE_%d\n", ifs);
+                push(stack, ifs);
+                ifs++;
                 break;
             case ELSE:
-                // peek = peek(stack);
-                // fprintf(output, "\n   ;; ELSE STATEMENT\n");
-                // fprintf(output, "   BRnzp endif_%d\n", peek);
-                // fprintf(output, "else_%d\n", peek);
+                peeked = peek(stack);
+                fprintf(output, "\n   ;; ELSE STATEMENT\n");
+                fprintf(output, "   BRnzp ENDIF_%d\n", peeked);
+                fprintf(output, "ELSE_%d\n", peeked);
+                elsed(stack);
                 break;
             case ENDIF:
-                peek = pop(stack);
-                fprintf(output, "   ");
+                elseClause = peekElse(stack);
+                peeked = pop(stack);
+                if (elseClause) {
+                    fprintf(output, "\n   ;; ENDIF STATEMENT\n");
+                    fprintf(output, "ENDIF_%d\n", peeked);
+                } else {
+                    fprintf(output, "ELSE_%d\n", peeked);
+                }
                 break;   
             case DROP:
                 printf("DROP");
