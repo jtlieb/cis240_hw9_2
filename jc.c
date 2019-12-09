@@ -332,6 +332,8 @@ int main(int argc, char **argv) {
     while (x != -1) {
         pop(stack);
     }
+    free(token);
+    free(stack);
     
 }
 
